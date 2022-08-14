@@ -18,7 +18,14 @@ type UserAdapter struct {
 }
 
 func (r *UserAdapter) Load(ctx context.Context, id string) (*domain.User, error) {
-	query := "select id, username, email, phone, date_of_birth from users where id = ?"
+	query := `
+		select
+			id, 
+			username,
+			email,
+			phone,
+			date_of_birth
+		from users where id = ?`
 	rows, err := r.DB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
@@ -37,20 +44,44 @@ func (r *UserAdapter) Load(ctx context.Context, id string) (*domain.User, error)
 	return nil, nil
 }
 func (r *UserAdapter) Create(ctx context.Context, user *domain.User) (int64, error) {
-	query := "insert into users (id, username, email, phone, date_of_birth) values (?, ?, ?, ?, ?)"
+	query := `
+		insert into users (
+			id,
+			username,
+			email,
+			phone,
+			date_of_birth)
+		values (
+			?,
+			?,
+			?, 
+			?,
+			?)`
 	tx := GetTx(ctx)
 	stmt, err := tx.Prepare(query)
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.ExecContext(ctx, user.Id, user.Username, user.Email, user.Phone, user.DateOfBirth)
+	res, err := stmt.ExecContext(ctx,
+		user.Id,
+		user.Username,
+		user.Email,
+		user.Phone,
+		user.DateOfBirth)
 	if err != nil {
 		return -1, err
 	}
 	return res.RowsAffected()
 }
 func (r *UserAdapter) Update(ctx context.Context, user *domain.User) (int64, error) {
-	query := "update users set username = ?, email = ?, phone = ?, date_of_birth = ? where id = ?"
+	query := `
+		update users 
+		set
+			username = ?,
+			email = ?,
+			phone = ?,
+			date_of_birth = ?
+		where id = ?`
 	tx := GetTx(ctx)
 	stmt, err := tx.Prepare(query)
 	if err != nil {

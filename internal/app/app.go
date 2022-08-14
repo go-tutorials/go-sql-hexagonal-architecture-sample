@@ -18,7 +18,7 @@ import (
 
 type ApplicationContext struct {
 	Health *health.Handler
-	User   port.UserHandler
+	User   port.UserTransport
 }
 
 func NewApp(ctx context.Context, conf Config) (*ApplicationContext, error) {
@@ -26,7 +26,7 @@ func NewApp(ctx context.Context, conf Config) (*ApplicationContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	logError := log.ErrorMsg
+	logError := log.LogError
 
 	userType := reflect.TypeOf(domain.User{})
 	userQueryBuilder := query.NewBuilder(db, "users", userType)

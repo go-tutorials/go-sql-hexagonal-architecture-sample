@@ -3,29 +3,29 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"github.com/core-go/core"
 	"github.com/core-go/search"
-	sv "github.com/core-go/service"
 	"github.com/gorilla/mux"
 	"net/http"
 	"reflect"
 
-	"go-service/internal/user/domain"
-	"go-service/internal/user/service"
+	. "go-service/internal/user/domain"
+	. "go-service/internal/user/service"
 )
 
-func NewUserHandler(find func(context.Context, interface{}, interface{}, int64, ...int64) (int64, string, error), service service.UserService, logError func(context.Context, string)) *HttpUserHandler {
-	filterType := reflect.TypeOf(domain.UserFilter{})
-	modelType := reflect.TypeOf(domain.User{})
+func NewUserHandler(find func(context.Context, interface{}, interface{}, int64, ...int64) (int64, string, error), service UserService, logError func(context.Context, string, ...map[string]interface{})) *UserHandler {
+	filterType := reflect.TypeOf(UserFilter{})
+	modelType := reflect.TypeOf(User{})
 	searchHandler := search.NewSearchHandler(find, modelType, filterType, logError, nil)
-	return &HttpUserHandler{service: service, SearchHandler: searchHandler}
+	return &UserHandler{service: service, SearchHandler: searchHandler}
 }
 
-type HttpUserHandler struct {
-	service service.UserService
+type UserHandler struct {
+	service UserService
 	*search.SearchHandler
 }
 
-func (h *HttpUserHandler) Load(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Load(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if len(id) == 0 {
 		http.Error(w, "Id cannot be empty", http.StatusBadRequest)
@@ -39,8 +39,8 @@ func (h *HttpUserHandler) Load(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusOK, user)
 }
-func (h *HttpUserHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var user User
 	er1 := json.NewDecoder(r.Body).Decode(&user)
 	defer r.Body.Close()
 	if er1 != nil {
@@ -55,8 +55,8 @@ func (h *HttpUserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusCreated, res)
 }
-func (h *HttpUserHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var user User
 	er1 := json.NewDecoder(r.Body).Decode(&user)
 	defer r.Body.Close()
 	if er1 != nil {
@@ -82,17 +82,17 @@ func (h *HttpUserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusOK, res)
 }
-func (h *HttpUserHandler) Patch(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if len(id) == 0 {
 		http.Error(w, "Id cannot be empty", http.StatusBadRequest)
 		return
 	}
 
-	var user domain.User
+	var user User
 	userType := reflect.TypeOf(user)
-	_, jsonMap, _ := sv.BuildMapField(userType)
-	body, er1 := sv.BuildMapAndStruct(r, &user)
+	_, jsonMap, _ := core.BuildMapField(userType)
+	body, er1 := core.BuildMapAndStruct(r, &user)
 	if er1 != nil {
 		http.Error(w, er1.Error(), http.StatusInternalServerError)
 		return
@@ -103,7 +103,7 @@ func (h *HttpUserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Id not match", http.StatusBadRequest)
 		return
 	}
-	json, er2 := sv.BodyToJsonMap(r, user, body, []string{"id"}, jsonMap)
+	json, er2 := core.BodyToJsonMap(r, user, body, []string{"id"}, jsonMap)
 	if er2 != nil {
 		http.Error(w, er2.Error(), http.StatusInternalServerError)
 		return
@@ -116,7 +116,7 @@ func (h *HttpUserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusOK, res)
 }
-func (h *HttpUserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	if len(id) == 0 {
 		http.Error(w, "Id cannot be empty", http.StatusBadRequest)
