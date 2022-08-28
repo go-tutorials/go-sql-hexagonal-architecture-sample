@@ -13,16 +13,19 @@ import (
 	. "go-service/internal/user/service"
 )
 
-func NewUserHandler(find func(context.Context, interface{}, interface{}, int64, ...int64) (int64, string, error), service UserService, logError func(context.Context, string, ...map[string]interface{})) *UserHandler {
+const InternalServerError = "Internal Server Error"
+
+func NewUserHandler(find func(context.Context, interface{}, interface{}, int64, ...int64) (int64, string, error), service UserService, validate func(context.Context, interface{}) ([]core.ErrorMessage, error), logError func(context.Context, string, ...map[string]interface{})) *UserHandler {
 	filterType := reflect.TypeOf(UserFilter{})
 	modelType := reflect.TypeOf(User{})
 	searchHandler := search.NewSearchHandler(find, modelType, filterType, logError, nil)
-	return &UserHandler{service: service, SearchHandler: searchHandler}
+	return &UserHandler{service: service, SearchHandler: searchHandler, validate: validate}
 }
 
 type UserHandler struct {
 	service UserService
 	*search.SearchHandler
+	validate func(context.Context, interface{}) ([]core.ErrorMessage, error)
 }
 
 func (h *UserHandler) Load(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +50,18 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, er1.Error(), http.StatusBadRequest)
 		return
 	}
-
-	res, er2 := h.service.Create(r.Context(), &user)
+	errors, er2 := h.validate(r.Context(), &user)
 	if er2 != nil {
+		h.LogError(r.Context(), er2.Error())
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
+		return
+	}
+	if len(errors) > 0 {
+		JSON(w, http.StatusUnprocessableEntity, errors)
+		return
+	}
+	res, er3 := h.service.Create(r.Context(), &user)
+	if er3 != nil {
 		http.Error(w, er1.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,10 +86,19 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Id not match", http.StatusBadRequest)
 		return
 	}
-
-	res, er2 := h.service.Update(r.Context(), &user)
+	errors, er2 := h.validate(r.Context(), &user)
 	if er2 != nil {
-		http.Error(w, er2.Error(), http.StatusInternalServerError)
+		h.LogError(r.Context(), er2.Error())
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
+		return
+	}
+	if len(errors) > 0 {
+		JSON(w, http.StatusUnprocessableEntity, errors)
+		return
+	}
+	res, er3 := h.service.Update(r.Context(), &user)
+	if er3 != nil {
+		http.Error(w, er3.Error(), http.StatusInternalServerError)
 		return
 	}
 	JSON(w, http.StatusOK, res)
@@ -108,10 +129,20 @@ func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, er2.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	res, er3 := h.service.Patch(r.Context(), json)
+	r = r.WithContext(context.WithValue(r.Context(), "method", "patch"))
+	errors, er3 := h.validate(r.Context(), &user)
 	if er3 != nil {
-		http.Error(w, er3.Error(), http.StatusInternalServerError)
+		h.LogError(r.Context(), er3.Error())
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
+		return
+	}
+	if len(errors) > 0 {
+		JSON(w, http.StatusUnprocessableEntity, errors)
+		return
+	}
+	res, er4 := h.service.Patch(r.Context(), json)
+	if er4 != nil {
+		http.Error(w, er4.Error(), http.StatusInternalServerError)
 		return
 	}
 	JSON(w, http.StatusOK, res)

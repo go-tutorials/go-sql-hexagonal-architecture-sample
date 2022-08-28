@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"reflect"
+
+	v "github.com/core-go/core/v10"
 	"github.com/core-go/health"
 	"github.com/core-go/log"
 	"github.com/core-go/search/query"
 	q "github.com/core-go/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"reflect"
 
 	"go-service/internal/user/adapter/handler"
 	"go-service/internal/user/adapter/repository"
@@ -27,6 +29,7 @@ func NewApp(ctx context.Context, conf Config) (*ApplicationContext, error) {
 		return nil, err
 	}
 	logError := log.LogError
+	validator := v.NewValidator()
 
 	userType := reflect.TypeOf(domain.User{})
 	userQueryBuilder := query.NewBuilder(db, "users", userType)
@@ -36,7 +39,7 @@ func NewApp(ctx context.Context, conf Config) (*ApplicationContext, error) {
 	}
 	userRepository := repository.NewUserAdapter(db)
 	userService := service.NewUserService(db, userRepository)
-	userHandler := handler.NewUserHandler(userSearchBuilder.Search, userService, logError)
+	userHandler := handler.NewUserHandler(userSearchBuilder.Search, userService, validator.Validate, logError)
 
 	sqlChecker := q.NewHealthChecker(db)
 	healthHandler := health.NewHandler(sqlChecker)
