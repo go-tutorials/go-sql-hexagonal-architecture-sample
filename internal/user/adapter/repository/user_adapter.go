@@ -25,7 +25,7 @@ func (r *UserAdapter) Load(ctx context.Context, id string) (*domain.User, error)
 			email,
 			phone,
 			date_of_birth
-		from users where id = ?`
+		from users where id = $1`
 	rows, err := r.DB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
@@ -52,11 +52,11 @@ func (r *UserAdapter) Create(ctx context.Context, user *domain.User) (int64, err
 			phone,
 			date_of_birth)
 		values (
-			?,
-			?,
-			?, 
-			?,
-			?)`
+			$1,
+			$2,
+			$3, 
+			$4,
+			$5)`
 	tx := GetTx(ctx)
 	stmt, err := tx.Prepare(query)
 	if err != nil {
@@ -77,11 +77,11 @@ func (r *UserAdapter) Update(ctx context.Context, user *domain.User) (int64, err
 	query := `
 		update users 
 		set
-			username = ?,
-			email = ?,
-			phone = ?,
-			date_of_birth = ?
-		where id = ?`
+			username = $1,
+			email = $2,
+			phone = $3,
+			date_of_birth = $4
+		where id = $5`
 	tx := GetTx(ctx)
 	stmt, err := tx.Prepare(query)
 	if err != nil {
@@ -122,7 +122,7 @@ func (r *UserAdapter) Patch(ctx context.Context, user map[string]interface{}) (i
 	return res.RowsAffected()
 }
 func (r *UserAdapter) Delete(ctx context.Context, id string) (int64, error) {
-	query := "delete from users where id = ?"
+	query := "delete from users where id = $1"
 	tx := GetTx(ctx)
 	stmt, err := tx.Prepare(query)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/core-go/log"
 	mid "github.com/core-go/log/middleware"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 
 	"go-service/internal/app"
 )

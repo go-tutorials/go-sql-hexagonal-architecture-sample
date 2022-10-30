@@ -9,7 +9,6 @@ import (
 	"github.com/core-go/log"
 	"github.com/core-go/search/query"
 	q "github.com/core-go/sql"
-	_ "github.com/go-sql-driver/mysql"
 
 	"go-service/internal/user/adapter/handler"
 	"go-service/internal/user/adapter/repository"
