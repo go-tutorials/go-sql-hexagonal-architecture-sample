@@ -8,11 +8,12 @@ sql:
 
 log:
   level: info
+  fields: appId,service,mobileNo,creditCard,corrId
   map:
     time: "@timestamp"
     msg: message
     stacktrace: stacktrace
-  caller_skip: 2
+  caller_skip: 3
 
 middleware:
   log: true
@@ -20,6 +21,17 @@ middleware:
   request: request
   response: response
   size: size
+  masks: mobileNo
+  constants:
+    app_id: "123"
+    service: log-sample
+  map:
+    mobile_no: header.mobileNo
+    credit_Card: header.creditCard
+    corr_id: header.corrId
+    email: body.email
+    username: body.username
+
 
 client:
   endpoint:

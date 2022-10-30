@@ -156,6 +156,42 @@
 			"response": []
 		},
 		{
+			"name": "update an user req",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"header\": {\n        \"requestId\": \"request1\",\n        \"requestTime\": \"2022-06-12T18:10:01.4025317+07:00\",\n        \"corrId\": \"corrId0001\",\n        \"mobileNo\": \"0987112233\",\n        \"creditCard\": \"0987112233445566\"\n    },\n    \"body\": {\n        \"id\": \"wolverine\",\n        \"username\": \"james.howlett\",\n        \"email\": \"james.howlett2@gmail.com\",\n        \"phone\": \"0987654321\",\n        \"dateOfBirth\": \"1974-11-16T00:00:00+07:00\",\n        \"age\": 123.789\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "update an user",
 			"request": {
 				"method": "PUT",
@@ -277,7 +313,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"pageIndex\": 1,\n    \"pageSize\": 20,\n    \"username\": \"james.howlett\",\n    \"email\": \"james\",\n    \"phone\": \"0987654321\",\n    \"sort\": \"phone\"\n}",
+					"raw": "{\n    \"pageIndex\": 1,\n    \"pageSize\": 20,\n    \"q\": \"james\",\n    \"sort\": \"-username,email\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -285,12 +321,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/users/search",
+					"raw": "http://localhost:8082/users/search",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "8082",
 					"path": [
 						"users",
 						"search"

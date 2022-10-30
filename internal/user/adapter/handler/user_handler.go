@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/core-go/core"
+	"github.com/core-go/log/zap"
 	"github.com/core-go/search"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -102,6 +103,32 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	JSON(w, http.StatusOK, res)
+}
+func (h *UserHandler) UpdateReq(w http.ResponseWriter, r *http.Request) {
+	var req UpdateReq
+	er1 := core.Decode(w, r, &req)
+	if er1 == nil {
+		errors, er2 := h.validate(r.Context(), req.Body)
+		if er2 != nil {
+			h.LogError(r.Context(), er2.Error())
+			http.Error(w, InternalServerError, http.StatusInternalServerError)
+			return
+		}
+		if len(errors) > 0 {
+			JSON(w, http.StatusUnprocessableEntity, errors)
+			return
+		}
+		res, er3 := h.service.Update(r.Context(), req.Body)
+		if er3 != nil {
+			log.Error(r.Context(), er3.Error())
+			http.Error(w, InternalServerError, http.StatusInternalServerError)
+			return
+		}
+		resObj := &UpdateRes{}
+		resObj.Header = BuildResponseHeader(req.Header, &errors)
+		resObj.Body = &ResBody{Res: res}
+		core.JSON(w, 200, resObj)
+	}
 }
 func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
