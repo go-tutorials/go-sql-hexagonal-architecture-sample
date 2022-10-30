@@ -160,6 +160,14 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	JSON(w, http.StatusOK, res)
 }
+func (h *UserHandler) SearchSample(w http.ResponseWriter, r *http.Request) {
+	filter := UserFilter{Filter: &search.Filter{}}
+	search.Decode(r, &filter, h.ParamIndex, h.FilterIndex)
+	var users []User
+	offset := search.GetOffset(filter.Limit, filter.Page)
+	total, _, _ := h.Find(r.Context(), &filter, &users, filter.Limit, offset)
+	core.JSON(w, 200, &search.Result{Total: total, List: &users})
+}
 
 func JSON(w http.ResponseWriter, code int, res interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
