@@ -6,7 +6,7 @@ import (
 
 	v "github.com/core-go/core/v10"
 	"github.com/core-go/health"
-	"github.com/core-go/log"
+	"github.com/core-go/log/zap"
 	"github.com/core-go/search/query"
 	q "github.com/core-go/sql"
 

@@ -11,6 +11,8 @@ log:
   map:
     time: "@timestamp"
     msg: message
+    stacktrace: stacktrace
+  caller_skip: 2
 
 middleware:
   log: true
