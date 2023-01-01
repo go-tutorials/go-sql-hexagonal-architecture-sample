@@ -87,7 +87,12 @@ func (r *UserAdapter) Update(ctx context.Context, user *domain.User) (int64, err
 	if err != nil {
 		return -1, err
 	}
-	res, err := stmt.ExecContext(ctx, user.Username, user.Email, user.Phone, user.DateOfBirth, user.Id)
+	res, err := stmt.ExecContext(ctx,
+		user.Username,
+		user.Email,
+		user.Phone,
+		user.DateOfBirth,
+		user.Id)
 	if err != nil {
 		return -1, err
 	}
