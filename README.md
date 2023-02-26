@@ -60,7 +60,7 @@ In this sample, search users with these criteria:
 - GET: retrieve a representation of the resource
 - POST: create a new resource
 - PUT: update the resource
-- PATCH: perform a partial update of a resource, refer to [service](https://github.com/core-go/core) and [sql](https://github.com/core-go/sql)  
+- PATCH: perform a partial update of a resource, refer to [core-go/core](https://github.com/core-go/core) and [sql](https://github.com/core-go/sql)  
 - DELETE: delete a resource
 
 ## API design for health check
