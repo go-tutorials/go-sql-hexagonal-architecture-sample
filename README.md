@@ -38,7 +38,7 @@ In this sample, search users with these criteria:
 - sort by phone ascending, id descending
 
 #### *Response:*
-- total: total of users, which is used to calculate numbers of pages at client 
+- total: total of users, which is used to calculate numbers of pages at client
 - list: list of users
 ```json
 {
