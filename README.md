@@ -71,7 +71,7 @@ To check if the service is available.
 {
     "status": "UP",
     "details": {
-        "mongo": {
+        "sql": {
             "status": "UP"
         }
     }
@@ -180,7 +180,7 @@ type UserService interface {
 ```
 We must solve 2 problems:
 1. At http handler layer, we must convert the user struct to map, with json format, and make sure the nested data types are passed correctly.
-2. At repository layer, from json format, we must convert the json format to database format (in this case, we must convert to bson of Mongo)
+2. At repository layer, from json format, we must convert the json format to database format (in this case, we must convert to column)
 
 #### Solutions for patch  
 At http handler layer, we use [core-go/core](https://github.com/core-go/core), to convert the user struct to map, to make sure we just update the fields we need to update
