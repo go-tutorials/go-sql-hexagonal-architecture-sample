@@ -9,12 +9,14 @@ sql:
 log:
   level: info
   fields: appId,service,mobileNo,creditCard,corrId
+  caller_level: "debug,error,panic"
+  caller_skip: 3
   map:
     time: "@timestamp"
     msg: message
+    caller: caller
+    function: func
     stacktrace: stacktrace
-  caller_skip: 3
-
 middleware:
   log: true
   skips: /health
