@@ -40,8 +40,7 @@ func (h *UserHandler) Load(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	status := IsNotFound(user)
-	JSON(w, status, user)
+	JSON(w, IsFound(user), user)
 }
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var user User
@@ -177,7 +176,7 @@ func GetStatus(status int64) int {
 	}
 	return http.StatusOK
 }
-func IsNotFound(res interface{}) int {
+func IsFound(res interface{}) int {
 	if res == nil {
 		return http.StatusNotFound
 	}
