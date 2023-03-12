@@ -63,7 +63,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	res, er3 := h.service.Create(r.Context(), &user)
 	if er3 != nil {
-		h.LogError(r.Context(), er3.Error())
+		h.LogError(r.Context(), er3.Error(), CreateMap(user))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -182,4 +182,17 @@ func IsNotFound(res interface{}) int {
 		return http.StatusNotFound
 	}
 	return http.StatusOK
+}
+func CreateMap(res interface{}, opts...string) map[string]interface{} {
+	key := "request"
+	if len(opts) > 0 && len(opts[0]) > 0 {
+		key = opts[0]
+	}
+	m := make(map[string]interface{})
+	b, err := json.Marshal(res)
+	if err != nil {
+		return m
+	}
+	m[key] = string(b)
+	return m
 }
