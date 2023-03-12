@@ -40,10 +40,7 @@ func (h *UserHandler) Load(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	status := http.StatusOK
-	if user == nil {
-		status = http.StatusNotFound
-	}
+	status := IsNotFound(user)
 	JSON(w, status, user)
 }
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +63,8 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	res, er3 := h.service.Create(r.Context(), &user)
 	if er3 != nil {
-		http.Error(w, er1.Error(), http.StatusInternalServerError)
+		h.LogError(r.Context(), er3.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	JSON(w, http.StatusCreated, res)
@@ -105,11 +103,8 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, er3.Error(), http.StatusInternalServerError)
 		return
 	}
-	if res <= 0 {
-		JSON(w, http.StatusNotFound, res)
-	} else {
-		JSON(w, http.StatusOK, res)
-	}
+	status := GetStatus(res)
+	JSON(w, status, res)
 }
 func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
@@ -153,11 +148,8 @@ func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, er4.Error(), http.StatusInternalServerError)
 		return
 	}
-	if res <= 0 {
-		JSON(w, http.StatusNotFound, res)
-	} else {
-		JSON(w, http.StatusOK, res)
-	}
+	status := GetStatus(res)
+	JSON(w, status, res)
 }
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
@@ -170,15 +162,24 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if res <= 0 {
-		JSON(w, http.StatusNotFound, res)
-	} else {
-		JSON(w, http.StatusOK, res)
-	}
+	status := GetStatus(res)
+	JSON(w, status, res)
 }
 
 func JSON(w http.ResponseWriter, code int, res interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	return json.NewEncoder(w).Encode(res)
+}
+func GetStatus(status int64) int {
+	if status <= 0 {
+		return http.StatusNotFound
+	}
+	return http.StatusOK
+}
+func IsNotFound(res interface{}) int {
+	if res == nil {
+		return http.StatusNotFound
+	}
+	return http.StatusOK
 }

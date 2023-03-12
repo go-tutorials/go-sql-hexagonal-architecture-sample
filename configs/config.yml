@@ -8,11 +8,14 @@ sql:
 
 log:
   level: info
+  caller_level: "debug,error,panic"
+  caller_skip: 3
   map:
     time: "@timestamp"
     msg: message
     stacktrace: stacktrace
-  caller_skip: 2
+    caller: caller
+    function: func
 
 middleware:
   log: true
