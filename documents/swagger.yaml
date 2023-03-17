@@ -322,6 +322,9 @@ components:
           example: 'username'
     User:
       type: object
+      required:
+        - username
+        - phone
       properties:
         id:
           type: string
