@@ -177,12 +177,22 @@ func GetStatus(status int64) int {
 	return http.StatusOK
 }
 func IsFound(res interface{}) int {
-	if res == nil {
+	if isNil(res) {
 		return http.StatusNotFound
 	}
 	return http.StatusOK
 }
-func MakeMap(res interface{}, opts...string) map[string]interface{} {
+func isNil(i interface{}) bool {
+	if i == nil {
+		return true
+	}
+	switch reflect.TypeOf(i).Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice:
+		return reflect.ValueOf(i).IsNil()
+	}
+	return false
+}
+func MakeMap(res interface{}, opts ...string) map[string]interface{} {
 	key := "request"
 	if len(opts) > 0 && len(opts[0]) > 0 {
 		key = opts[0]
