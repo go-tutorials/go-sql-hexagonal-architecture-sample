@@ -1,14 +1,14 @@
 module go-service
 
-go 1.18
+go 1.17
 
 require (
 	github.com/core-go/config v0.1.0
 	github.com/core-go/core v0.3.5
 	github.com/core-go/health v0.4.8
 	github.com/core-go/log v0.1.3
-	github.com/core-go/search v0.2.8
-	github.com/core-go/sql v0.3.6
+	github.com/core-go/search v0.2.10
+	github.com/core-go/sql v0.3.7
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.4
 )
