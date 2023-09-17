@@ -16,7 +16,7 @@ import (
 
 type ApplicationContext struct {
 	Health *health.Handler
-	User   port.UserPort
+	User   port.UserTransport
 }
 
 func NewApp(ctx context.Context, cfg Config) (*ApplicationContext, error) {
