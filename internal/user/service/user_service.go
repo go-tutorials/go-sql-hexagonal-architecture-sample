@@ -14,21 +14,22 @@ type UserService interface {
 	Update(ctx context.Context, user *User) (int64, error)
 	Patch(ctx context.Context, user map[string]interface{}) (int64, error)
 	Delete(ctx context.Context, id string) (int64, error)
+	Search(ctx context.Context, filter *UserFilter) ([]User, int64, error)
 }
 
 func NewUserService(db *sql.DB, repository UserRepository) UserService {
-	return &userService{db: db, repository: repository}
+	return &UserUseCase{db: db, repository: repository}
 }
 
-type userService struct {
+type UserUseCase struct {
 	db         *sql.DB
 	repository UserRepository
 }
 
-func (s *userService) Load(ctx context.Context, id string) (*User, error) {
+func (s *UserUseCase) Load(ctx context.Context, id string) (*User, error) {
 	return s.repository.Load(ctx, id)
 }
-func (s *userService) Create(ctx context.Context, user *User) (int64, error) {
+func (s *UserUseCase) Create(ctx context.Context, user *User) (int64, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return -1, nil
@@ -45,7 +46,7 @@ func (s *userService) Create(ctx context.Context, user *User) (int64, error) {
 	err = tx.Commit()
 	return res, err
 }
-func (s *userService) Update(ctx context.Context, user *User) (int64, error) {
+func (s *UserUseCase) Update(ctx context.Context, user *User) (int64, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return -1, nil
@@ -62,7 +63,7 @@ func (s *userService) Update(ctx context.Context, user *User) (int64, error) {
 	err = tx.Commit()
 	return res, err
 }
-func (s *userService) Patch(ctx context.Context, user map[string]interface{}) (int64, error) {
+func (s *UserUseCase) Patch(ctx context.Context, user map[string]interface{}) (int64, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return -1, nil
@@ -79,7 +80,7 @@ func (s *userService) Patch(ctx context.Context, user map[string]interface{}) (i
 	err = tx.Commit()
 	return res, err
 }
-func (s *userService) Delete(ctx context.Context, id string) (int64, error) {
+func (s *UserUseCase) Delete(ctx context.Context, id string) (int64, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return -1, nil
@@ -95,4 +96,7 @@ func (s *userService) Delete(ctx context.Context, id string) (int64, error) {
 	}
 	err = tx.Commit()
 	return res, err
+}
+func (s *UserUseCase) Search(ctx context.Context, filter *UserFilter) ([]User, int64, error) {
+	return s.repository.Search(ctx, filter)
 }
