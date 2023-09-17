@@ -22,13 +22,16 @@ type ApplicationContext struct {
 	User   port.UserPort
 }
 
-func NewApp(ctx context.Context, conf Config) (*ApplicationContext, error) {
-	db, err := q.OpenByConfig(conf.Sql)
+func NewApp(ctx context.Context, cfg Config) (*ApplicationContext, error) {
+	db, err := q.OpenByConfig(cfg.Sql)
 	if err != nil {
 		return nil, err
 	}
 	logError := log.LogError
-	validator := v.NewValidator()
+	validator, err := v.NewValidator()
+	if err != nil {
+		return nil, err
+	}
 
 	userType := reflect.TypeOf(domain.User{})
 	userQueryBuilder := query.NewBuilder(db, "users", userType)

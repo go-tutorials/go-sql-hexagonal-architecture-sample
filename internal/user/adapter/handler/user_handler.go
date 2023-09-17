@@ -17,15 +17,17 @@ const InternalServerError = "Internal Server Error"
 
 func NewUserHandler(find func(context.Context, interface{}, interface{}, int64, int64) (int64, error), service UserService, validate func(context.Context, interface{}) ([]core.ErrorMessage, error), logError func(context.Context, string, ...map[string]interface{})) *UserHandler {
 	filterType := reflect.TypeOf(UserFilter{})
-	modelType := reflect.TypeOf(User{})
-	searchHandler := search.NewSearchHandler(find, modelType, filterType, logError, nil)
-	return &UserHandler{service: service, SearchHandler: searchHandler, validate: validate}
+	userType := reflect.TypeOf(User{})
+	_, jsonMap, _ := core.BuildMapField(userType)
+	searchHandler := search.NewSearchHandler(find, userType, filterType, logError, nil)
+	return &UserHandler{service: service, SearchHandler: searchHandler, Validate: validate, jsonMap: jsonMap}
 }
 
 type UserHandler struct {
 	service UserService
 	*search.SearchHandler
-	validate func(context.Context, interface{}) ([]core.ErrorMessage, error)
+	Validate func(context.Context, interface{}) ([]core.ErrorMessage, error)
+	jsonMap  map[string]int
 }
 
 func (h *UserHandler) Load(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +52,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, er1.Error(), http.StatusBadRequest)
 		return
 	}
-	errors, er2 := h.validate(r.Context(), &user)
+	errors, er2 := h.Validate(r.Context(), &user)
 	if er2 != nil {
 		h.LogError(r.Context(), er2.Error())
 		http.Error(w, InternalServerError, http.StatusInternalServerError)
@@ -87,7 +89,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Id not match", http.StatusBadRequest)
 		return
 	}
-	errors, er2 := h.validate(r.Context(), &user)
+	errors, er2 := h.Validate(r.Context(), &user)
 	if er2 != nil {
 		h.LogError(r.Context(), er2.Error())
 		http.Error(w, InternalServerError, http.StatusInternalServerError)
@@ -113,8 +115,6 @@ func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user User
-	userType := reflect.TypeOf(user)
-	_, jsonMap, _ := core.BuildMapField(userType)
 	body, er1 := core.BuildMapAndStruct(r, &user)
 	if er1 != nil {
 		http.Error(w, er1.Error(), http.StatusInternalServerError)
@@ -126,13 +126,13 @@ func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Id not match", http.StatusBadRequest)
 		return
 	}
-	json, er2 := core.BodyToJsonMap(r, user, body, []string{"id"}, jsonMap)
+	json, er2 := core.BodyToJsonMap(r, user, body, []string{"id"}, h.jsonMap)
 	if er2 != nil {
 		http.Error(w, er2.Error(), http.StatusInternalServerError)
 		return
 	}
 	r = r.WithContext(context.WithValue(r.Context(), "method", "patch"))
-	errors, er3 := h.validate(r.Context(), &user)
+	errors, er3 := h.Validate(r.Context(), &user)
 	if er3 != nil {
 		h.LogError(r.Context(), er3.Error())
 		http.Error(w, InternalServerError, http.StatusInternalServerError)
