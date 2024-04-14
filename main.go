@@ -5,6 +5,7 @@ import (
 	"github.com/core-go/config"
 	"github.com/core-go/core"
 	mid "github.com/core-go/log/middleware"
+	"github.com/core-go/log/strings"
 	"github.com/core-go/log/zap"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -22,7 +23,7 @@ func main() {
 
 	log.Initialize(cfg.Log)
 	r.Use(mid.BuildContext)
-	logger := mid.NewLogger()
+	logger := mid.NewMaskLogger(MaskLog, MaskLog)
 	if log.IsInfoEnable() {
 		r.Use(mid.Logger(cfg.MiddleWare, log.InfoFields, logger))
 	}
@@ -38,4 +39,14 @@ func main() {
 	if err = server.ListenAndServe(); err != nil {
 		log.Error(ctx, err.Error())
 	}
+}
+
+func MaskLog(name string, v interface{}) interface{}  {
+	if name == "phone" {
+		s, ok := v.(string)
+		if ok {
+			return strings.Mask(s, 0, 3, "*")
+		}
+	}
+	return v
 }

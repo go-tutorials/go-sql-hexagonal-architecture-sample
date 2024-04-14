@@ -53,8 +53,8 @@ func (r *UserAdapter) Load(ctx context.Context, id string) (*domain.User, error)
 		err = rows.Scan(
 			&user.Id,
 			&user.Username,
-			&user.Phone,
 			&user.Email,
+			&user.Phone,
 			&user.DateOfBirth)
 		return &user, nil
 	}
