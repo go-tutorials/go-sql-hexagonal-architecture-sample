@@ -2,8 +2,15 @@ package app
 
 import (
 	"context"
-	. "github.com/core-go/core"
 	"github.com/gorilla/mux"
+)
+
+const (
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	PATCH  = "PATCH"
+	DELETE = "DELETE"
 )
 
 func Route(ctx context.Context, r *mux.Router, cfg Config) error {
